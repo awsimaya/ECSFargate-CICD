@@ -41,16 +41,17 @@
 ![](images/image005.png)
 
 # Create Azure DevOps Pipeline
-## Create a Build Pipeline
+## Setup AWS Connection with Azure DevOps
 * On your Azure DevOps home page, go ahead and create a project.
 * Under Project Settings > Service connections, click on **New Service connections** and select **AWS** from that list
 * You will see a window similar to the screenshot below. Give a connection name, enter the Access Key Id and Secret Access Key. Click **OK**
 ![](images/image015.png) 
 * You will see a screen like the one below once this process is complete
 ![](images/image017.png)
+## Create a Build Pipeline
 * Navigate to **Repos** page on the left navigation section. The screen should look similar to this below
 ![](images/image009.png)
-* Push code from your local machine to this repo
+* Push code from your local machine to this repo. _git pull_ the source code (HelloFargate.zip) from here - https://github.com/awsimaya/ECSFargate-CICD
 * Click **Builds** under **Pipelines**. On this page, click **New Pipeline**
 * Your page should look like the one below
 ![](images/image021.jpg) Click **Use the visual designer** link under **Where is your code?** section 
