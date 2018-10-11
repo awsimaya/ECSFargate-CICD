@@ -51,7 +51,10 @@
 ## Create a Build Pipeline
 * Navigate to **Repos** page on the left navigation section. The screen should look similar to this below
 ![](images/image009.png)
-* Push code from your local machine to this repo. _git pull_ the source code (HelloFargate.zip) from here - https://github.com/awsimaya/ECSFargate-CICD
+* Click on **Import** under **or Import a repository**
+* Select **Require Authentication** checkbox and enter the GitHub URL and credentials. Click **Import**. Now Azure DevOps will clone the code from GitHub into its own git repo
+![](images/gitimport.png)
+* **THIS IS A PLACEHOLDER STEP until we get the target Github repo** - Push code from your local machine to this repo. _git pull_ the source code (HelloFargate.zip) from here - https://github.com/awsimaya/ECSFargate-CICD
 * Click **Builds** under **Pipelines**. On this page, click **New Pipeline**
 * Your page should look like the one below
 ![](images/image021.jpg) Click **Use the visual designer** link under **Where is your code?** section 
