@@ -39,6 +39,9 @@
 * You will see a screen like the one below once this process is complete
 ![](images/image017.png)
 ## Create a Build Pipeline
+
+> In this step, we will create a Build pipeline to build a docker container image that contains our application and also push it to AWS Elastic Container Repository
+
 * Navigate to **Repos** page on the left navigation section. The screen should look similar to this below
 ![](images/image009.png)
 * Click on **Import** under **or Import a repository**
