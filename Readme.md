@@ -127,9 +127,7 @@
 * The current screen should look similar to the one below. Notice that the **Last status** column says _PROVISIONING_ which means the taks is currently being executed
 ![](images/servicestatus1.png)
 * Once the value on **Last status** column says **RUNNING** and is green, click on the task name under **Task** column
-* On the next page under **Network**, click on the link next to **ENI Id**
-* You will be taken to a page similar to the one below. Now copy and paste the value under **IPV4 Public IP** column on a new browser tab and press enter.
-![](images/image097.png)
+* Copy and paste the value of **Public IP** under **Network** on to a new browser tab and press Enter
 * You should see the home page of the your new application running on Amazon ECS Fargate
 
 ## Create a Release Pipeline
