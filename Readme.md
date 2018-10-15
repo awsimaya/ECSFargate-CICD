@@ -1,37 +1,25 @@
-## Create VPC
-* Login to AWS Console and navigate to the VPC home page
-* Click on **Launch VPC Wizard** button
-![](images/vpc1.png)
-* Select **VPC with a Single Public Subnet** and click **Select**
-![](images/vpc2.png)
-* Leave the first 2 settings as is, and give the VPC name as _hellofargatevpc_
-* Select an Availability Zone from the **Availability Zone** drop down
-* Leave everything else as is and click **Create VPC**
-* Your new VPC is created successfully
+# Create a CICD pipeline to deploy an application on ECS Fargate environment
+> In this lab we will create a CICD pipeline on Azure DevOps using AWS Tools for VSTS.
+## AWS Region Setup
 
-## Create Security Group
-* Click on **Security Groups** under **Security** on the left hand side navigation section
-* Click on **Create Security Group**
-* In the pop-up screen, select _hellofargatevpc_ which we just created for the VPC drop down
-* Type _Default SG for ECS_ for the **Description** text box
-* Type _ecsdefaultcluster_ for the **Name tag** text box 
-* See screen below for clarity
-![](images/sg1.png)
-* Click **Create**
-* Now go to the **Inbound Rules** tab on the security group you just created and add HTTP Port 80 to be allowed. Look at the screenshot below for clarity
-![](images/sg2.png)
-* Click **Save**
-* Your Security Group is created successfully
+> This is a critical step. Ensure you follow the instruction accurately _before_ you proceed. Here we will set the AWS region we are going to work on. It is necessary to follow the instructions carefully to ensure successful completion of the lab.
+
+* Set your region to EU-WEST-1 (Ireland). See picture below and ensure your setup is set right.
+
+![](images/region.png)
 
 ## Create a new Elastic Container Repository
+
+> In this section, we will create a new Elastic Container Repository to host our container images. These images will be used in our example to create container instances that will run as part of a cluster on the ECS 
+
 * Login to AWS Console and navigate to Elastic Container Service home page
-* Click **Repositories** under **Amazon ECR**
-* Click **Create Repository**
+* Click on **Get Started**
 * Enter _hellofargaterepo_ in the **Repository name** text field and click **Next step**
 * Your new Elastic Container Repository is created successfully
 
 # Setup Azure DevOps Environment
 ## Install AWS Tools for Azure DevOps
+> In this step, we will install AWS Tools for Azure DevOps on to your account. This will allow us to leverage the powerful features the add-on provides to created CICD tasks on AWS
 
 * Navigate to [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=AmazonWebServices.aws-vsts-tools) and click on **Get it free** button as shown in the image below
 ![](images/image001.png)
@@ -42,7 +30,9 @@
 
 # Create Azure DevOps Pipeline
 ## Setup AWS Connection with Azure DevOps
-* On your Azure DevOps home page, go ahead and create a project.
+> In this step, we will create a service connection to AWS on Azure DevOps. This will allow us to easily execute AWS specific tasks by simply selecting the service connection within the task itself.
+
+* On your Azure DevOps home page, go ahead and create a project. Use default settings.
 * Under Project Settings > Service connections, click on **New Service connections** and select **AWS** from that list
 * You will see a window similar to the screenshot below. Give a connection name, enter the Access Key Id and Secret Access Key. Click **OK**
 ![](images/image015.png) 
@@ -67,18 +57,25 @@
 ![](images/image031.png)
 * Once again click on the + symbol next to  **Agent job 1**. Type _aws_ on the search field which will list all **AWS** tasks. 
 * Select _AWS Elastic Container Registry Push_ task and click **Add**
-* Name the image _Push Image to ECR_. Select the name of the AWS Credentials you setup earlier under **AWS Credentials** drop down. Select _US East (N.Virginia)_ as Region. Select _Image name with optional tag_ for Image identity field. Enter _hellofargate_ for the **Source Image Name** field. Enter _latest_ for **Source Image tag** field. Enter _hellofargaterepo_ for the **Target Repository Name** field. Enter _latest_ for the **Target Repository Tag** field. Now click on **Save pipeline** to save your changes. The screenshot below shows all the settings for easier understanding.
+* Name the image _Push Image to ECR_. Select the name of the AWS Credentials you setup earlier under **AWS Credentials** drop down. Select _EU (Ireland) [eu-west-1]_ as Region. Select _Image name with optional tag_ for Image identity field. Enter _hellofargate_ for the **Source Image Name** field. Enter _latest_ for **Source Image tag** field. Enter _hellofargaterepo_ for the **Target Repository Name** field. Enter _latest_ for the **Target Repository Tag** field. Now click on **Save pipeline** to save your changes. The screenshot below shows all the settings for easier understanding.
 ![](images/image038.png)
 * You can rename the build pipeline by just clicking on **HelloFargate-CI** at the top and typing a name as shown below
 ![](images/image040.png)
+
+> It might take around 2 minutes or so for the image to be published to the repository. Go ahead and start the next step (_Create ECS Task Definition_) till this gets completed.
+
 * Go to the AWS ECR console and click on **hellofargaterepo** repository and make sure there is a new entry and the **Pushed at** column reflects the latest timestamp
 
 ## Create ECS Task Definition
+> In this step, we are going to create a _Task Definition_ that will be used to create the container instances in the cluster. A task definition is the core resource within ECS. This is where you define which container images to run, CPU/Memory, ports, commands etc.
+
 * Login to AWS Console and navigate to Elastic Container Service home page
+* Go to **Repositories** under **Amazon ECR** and click on the **hellofargaterepo** repository
+* Select the value of **Repository URI** and press **Ctrl+C** or **Cmd+C** if you're using a Mac. You will need this in the next step
 * Select **Task Definitions** and click on **Create new Task Definition** 
 * On the next screen, select **FARGATE** launch type and click **Next**
 * On the next screen, give the Task Definition a name. In this exercise, I will call it _MyNextTaskDefinition_
-* Select _1 GB_ for Task memory and _0.5 vCPU_ for Task CPU dropdowns respectively
+* Select _0.5 GB_ for Task memory and _0.25 vCPU_ for Task CPU dropdowns respectively
 * Your screen should look similar to the one below
 ![](images/image087.png)
 * Click **Add Container**
@@ -91,38 +88,48 @@
 * Your Task definition is created successfully
 
 ## Create ECS Cluster
+> In this section we are going to create a Elastic Container Service cluster. A cluster typically has one or more nodes , which are the workermachines that run your containerized applications and other workloads.
+
+![](images/createcluster1.png)
 * Click on **Clusters** on the ECS home page
 * Click on **Create Cluster**
-* Select **Networking Only** and click **Next step**
-* Name the cluster as _hellofargatecluster_ and click **Create**
+* Select **Networking Only** option and click **Next step**
+* Name the cluster as _hellofargatecluster_ 
+* Check the **Create VPC** checkbox 
+* Delete Subnet 2 by clicking the _x_ to the right and leave other values to default
+* Click **Create**
+> This step will take about a minute to complete. In the background, AWS is creating a [CloudFormation](https://aws.amazon.com/cloudformation/) stack with all the input settings.
+
 * ECS cluster is created sucessfully
+> Once complete, make sure you take a note of the VPC name that we just created, since we will use it in the future steps
+* Click on **View Cluster** to see the cluster
 
 ## Create a new Service
 * On the newly created cluster page, click on **Create** under **Services** tab
+* Select _FARGATE_ for **Launch type** option
 * Make sure the Task Definition and the Clusters are selected to the ones you just created
-* Enter _1_ for Service name field
+* Enter _hellofargateservice_ for Service name field
 * Enter _1_ for Number of tasks field and leave everything else as is. Click **Next step**
-* Select _hellofargatevpc_ for the Cluster VPC drop down
-* Select the only subnets that appears in the drop down for the **Subnets** field
-* Click on **Edit** for **Security groups** and select **Select existing security group** under **Assigned security group**
-* Select the SG that has a description saying **Default SG for ECS** and click **Save**
-* Make sure **Auto-assign public IP** is set to _ENABLED_
+* Make sure the VPC drop down has the name of the VPC you just created 
+* Click on the **Subnects** drop down and select the subnet that comes up
+* Click on **Edit** for **Security groups** and ensure the **Inboud rules for security group** has Port 80 selected. Look at the image below for clarity. Click cancel to exit the **Configure security groups** page
+![](images/securitygroup.png)
 * Select _None_ for Load balancing
 * Under **Service Discovery** uncheck the **Enable service discovery integration** checkbox and click **Next Step**
 * Leave the **Set Auto Scaling** to _Do not adjust the service's desired count_ as it is
 * Do a quick review of the **Review** screen and click **Create service**
-* The cluster service is not created successfully
+* The cluster service is now created successfully
+* Click on **View Service**
 * Go to the **Tasks** tab and check the **Last status** column. It will refresh its status to **RUNNING** and turn green once the provisioning is complete
 * The current screen should look similar to the one below. Notice that the **Last status** column says _PROVISIONING_ which means the taks is currently being executed
 ![](images/servicestatus1.png)
 * Once the value on **Last status** column says **RUNNING** and is green, click on the task name under **Task** column
 * On the next page under **Network**, click on the link next to **ENI Id**
-* You will be taken to a page similar to the one below. Now copy paste the value under **IPV4 Public IP** column on a browser and press enter.
+* You will be taken to a page similar to the one below. Now copy and paste the value under **IPV4 Public IP** column on a new browser tab and press enter.
 ![](images/image097.png)
 * You should see the home page of the your new application running on Amazon ECS Fargate
 
-
-# Create a Release Pipeline
+## Create a Release Pipeline
 * Go to **Releases** page on your Azure DevOps project
 * Click **New pipeline**
 * Select **Empty job** under **Select a template**
@@ -136,20 +143,16 @@
 * Name the task _Install AWS CLI_ and enter _pip install awscli_ in the **Script** field
 * Click on the + sign next to **Agent job**. Type **aws** in the search field. Select **AWS CLI** task and click **Add**
 * Name the new task _Update ECS Service_. Select the name of the AWS credential you configured earlier.
-* Select **US East (N.Virginia)** as region
+* Select _EU (Ireland) [eu-west-1]_ as region
 * Enter _ecs_ in the **Command** field. 
 * Enter _update-service_ in the **Subcommand** field. 
-* Enter --service hellofargatecontainer-service --force-new-deployment in the **Options and parameters** field
+* Enter *--cluster hellofargatecluster --service hellofargatecontainer-service --force-new-deployment* in the **Options and parameters** field
 ![](images/image062.png)
 * Save the changes.
-## Run Build Pipeline
-* Go to **Builds** and select the build pipeline you created earlier.
-* You should see a screen similar to the one below. Click **Run**
-![](images/image064.png)
-* Simply click **Queue** in the pop-up screen
-* The build is now queued and an agent will pick it up for processing. Once it gets picked up and gets executed successfully, you will see a screen like the one below
-![](images/image068.png)
-## Run Release Pipeline
+
+## Create a Release
+> In this step, we will create a release using the release pipeline we created in the previous step. Doing this will deploy the container into the cluster using the task definition it is configured to.
+
 * Go to **Releases** and select the release pipeline you created earlier.
 * You should see a screen similar to the one below. Click **Create a release**
 ![](images/image070.png)
