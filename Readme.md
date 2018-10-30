@@ -22,8 +22,7 @@
 * Your new Elastic Container Repository is created successfully
 
 ## Create a new IAM User for AzureDevOps
-> [Optional] If you already have Secret Access Key ID and Secret Access Key of an IAM User account to be used with Azure DevOps then you can skip this section.
-> In this section, we will create a new IAM user account that will be used by your Azure DevOps service to deploy resources in your AWS Account. 
+> [Optional] If you already have Secret Access Key ID and Secret Access Key of an IAM User account to be used with Azure DevOps then you can skip this section. In this section, we will create a new IAM user account that will be used by your Azure DevOps service to deploy resources in your AWS Account. 
 
 *Click on IAM Service 
 *In the navigation pane, choose **Users** and then choose **Add user**.
