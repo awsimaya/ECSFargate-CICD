@@ -56,7 +56,8 @@
 * Navigate to **Repos** page on the left navigation section. The screen should look similar to this below
 ![](images/image009.png)
 * Click on **Import** under **or Import a repository**
-* Enter the GitHub URL (https://github.com/awsimaya/ECSFargate.git). Click **Import**. Now Azure DevOps will clone the project from GitHub into its own git repo
+* Enter the GitHub URL (https://github.com/awsimaya/ECSFargate.git). Click **Import**. Now Azure DevOps will clone the project from GitHub into its own git repo.
+
 ![](images/gitimport.png)
 * You can also create a new project and/or repository to start from scratch. To create new project, go to home page in Azure DevOps and select **+ Create Project**. To create new repository in existing project, you can select the **Import repository** from the Repos screen by providing the sample application code's Github repository link. Now Azure DevOps will clone the project from GitHub into its own git repo.
 ### Create a new Build pipeline
@@ -67,10 +68,11 @@
 * Click **Continue**.
 * On the **Select a template** screen, select **Empty Job** as shown in the screenshot below and click **Apply**
 ![](images/image024.png)
-* Now you should be on the **Tasks** tab inside the Build pipeline. Here, to the right hand side for the drop down **Agent Pool** under **Agent job**, select _Hosted Ubuntu 1604_. More information on Microsoft-hosted agens in Azure DevOps can be found here (https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=vsts&tabs=yaml). Leave other fields to the default values.
-* Add a task by click on the **+** sign next to **Agent job 1** on the left hand side. Type **Command** on the search bar on the right hand side. You should see the **Command Line** task as shown below
-![](images/image029.png). Now click **Add**
-* Once added, name the task **Build Docker Image** and enter the command _docker build -t hellofargate ./HelloFargate_ in the **Script** field as shown below. This command will tag the resulting docker image with 'hellofargate' (case sensitive) and provides HelloFargate folder in the repository as the build context. Syntax of the command is _docker build [OPTIONS] PATH | URL | -_. More details on docker build command can be found here (https://docs.docker.com/engine/reference/commandline/build/).
+* Now you should be on the **Tasks** tab inside the Build pipeline. Here, to the right hand side for the drop down **Agent Pool** under **Agent job**, select _Hosted Ubuntu 1604_. More information on Microsoft-hosted agents in Azure DevOps can be found here (https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=vsts&tabs=yaml). 
+* Leave other fields to their default values.
+* Add a task by click on the **+** sign next to **Agent job 1** on the left hand side. Type **Command** on the search bar on the right hand side. You should see the **Command Line** task as shown below and click **Add**.
+![](images/image029.png). 
+* Once added, name the task **Build Docker Image** and enter the command _docker build -t hellofargate ./HelloFargate_ in the **Script** field as shown below. This command will tag the resulting docker image with 'hellofargate' (case sensitive) and provides HelloFargate folder in the repository as the build context (path to the Dockerfile). Syntax of the command is _docker build [OPTIONS] PATH | URL | -_. More details on docker build command can be found here (https://docs.docker.com/engine/reference/commandline/build/).
 
 ![](images/image031.png)
 * Once again click on the + symbol next to  **Agent job 1**. Type _aws_ on the search field which will list all **AWS** tasks. 
