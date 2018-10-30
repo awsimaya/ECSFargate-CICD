@@ -24,17 +24,16 @@
 ## Create a new IAM User for AzureDevOps
 > [Optional] If you already have Secret Access Key ID and Secret Access Key of an IAM User account to be used with Azure DevOps then you can skip this section. In this section, we will create a new IAM user account that will be used by your Azure DevOps service to deploy resources in your AWS Account. 
 
-*Click on IAM Service 
-*In the navigation pane, choose **Users** and then choose **Add user**.
-*Type the user name for the new user. This is the sign-in name for AWS.
-*Select only programmatic access. This creates an access key for each new user. You can view or download the access keys when you get to the Final page.
-*Click on **Next: Permissions**
-*Select Attach existing policies directly
-*Select Administrator Access 
-*[Note - This is not a best practice to provide Administrator Access. Its recommended to follow least access privilege and limit permissions to the resources that would be required from AzureDevOps account. This could vary depending upon your use case and scenarios. Example you may chose to create different IAM User account for Non-Prod Vs Prod and appropriately provide the  necessary permissions following least access privilege principle.]
-*Click on **Next: Review**
-**Click on **Create User**
-*Save the Secret Access Key and Access Key ID to be used later in this lab. 
+* Click on IAM Service 
+* In the navigation pane, choose **Users** and then choose **Add user**.
+* Type the user name for the new user. This is the sign-in name for AWS.
+* Select only programmatic access. This creates an access key for each new user. You can view or download the access keys when you get to the Final page.
+* Click on **Next: Permissions**.
+* Select Attach existing policies directly.
+* Select Administrator Access. [Note: This is not a best practice to provide Administrator Access. Its recommended to follow least access privilege and limit permissions to the resources that would be required from AzureDevOps account. This could vary depending upon your use case and scenarios. Example you may chose to create different IAM User account for Non-Prod Vs Prod and appropriately provide the  necessary permissions following least access privilege principle.]
+* Click on **Next: Review**
+* Review the settings and Click on **Create User**.
+* Save the Secret Access Key and Access Key ID to be used later in this lab. 
 
 # Setup Azure DevOps Environment
 ## Install AWS Tools for Azure DevOps
