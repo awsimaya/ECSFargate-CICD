@@ -1,6 +1,11 @@
-# Create a CICD pipeline to deploy an application on ECS Fargate environment
+# Create a CICD pipeline to deploy a .Net Core application on Amazon ECS Fargate environment
 > In this lab we will create a CICD pipeline on Azure DevOps using AWS Tools for VSTS.
-## AWS Region Setup
+## Prerequisites
+* An Amazon Web Services (AWS) account and an associated IAM User account. 
+* Validate access to the sample source code repository in Github by browsing to this url https://github.com/awsimaya/ECSFargate.git 
+* Azure DevOps aka Visual Studio Team Services (VSTS) account to set up Build and Release pipelines
+
+## AWS Environment Setup
 
 > This is a critical step. Ensure you follow the instruction accurately _before_ you proceed. Here we will set the AWS region we are going to work on. It is necessary to follow the instructions carefully to ensure successful completion of the lab.
 
@@ -8,14 +13,20 @@
 
 ![](images/region.png)
 
-## Create a new Elastic Container Repository
 
-> In this section, we will create a new Elastic Container Repository to host our container images. These images will be used in our example to create container instances that will run as part of a cluster on the ECS 
+## Create a new IAM User for AzureDevOps
+> [Optional] If you already have Secret Access Key ID and Secret Access Key of an IAM User account to be used with Azure DevOps then you can skip this section. In this section, we will create a new IAM user account that will be used by your Azure DevOps service to deploy resources in your AWS Account. 
 
-* Login to AWS Console and navigate to Elastic Container Service home page
-* Click on **Get Started**
-* Enter _hellofargaterepo_ in the **Repository name** text field and click **Next step**
-* Your new Elastic Container Repository is created successfully
+* Click on IAM Service 
+* In the navigation pane, choose **Users** and then choose **Add user**.
+* Type the user name for the new user. This is the sign-in name for AWS.
+* Select only programmatic access. This creates an access key for each new user. You can view or download the access keys when you get to the Final page.
+* Click on **Next: Permissions**.
+* Select Attach existing policies directly.
+* Select Administrator Access. [Note: This is not a best practice to provide Administrator Access. Its recommended to follow least access privilege and limit permissions to the resources that would be required from AzureDevOps account. This could vary depending upon your use case and scenarios. Example you may chose to create different IAM User account for Non-Prod Vs Prod and appropriately provide the  necessary permissions following least access privilege principle.]
+* Click on **Next: Review**
+* Review the settings and Click on **Create User**.
+* Save the Secret Access Key and Access Key ID to be used later in this lab. 
 
 # Setup Azure DevOps Environment
 ## Install AWS Tools for Azure DevOps
@@ -30,44 +41,52 @@
 
 # Create Azure DevOps Pipeline
 ## Setup AWS Connection with Azure DevOps
-> In this step, we will create a service connection to AWS on Azure DevOps. This will allow us to easily execute AWS specific tasks by simply selecting the service connection within the task itself.
+> In this step, we will create a service connection to AWS on Azure DevOps. This will allow us to easily execute AWS specific tasks by simply selecting the service connection within the task itself. If you already have this configured in your Azure DevOps account then you can skip this step and go to next step.
 
 * On your Azure DevOps home page, go ahead and create a project. Use default settings.
 * Under Project Settings > Service connections, click on **New Service connections** and select **AWS** from that list
-* You will see a window similar to the screenshot below. Give a connection name, enter the Access Key Id and Secret Access Key. Click **OK**
+* You will see a window similar to the screenshot below. Give a connection name, enter the Access Key Id and Secret Access Key of the IAM User Account to be used by Azure DevOps. Click **OK**
 ![](images/image015.png) 
 * You will see a screen like the one below once this process is complete
 ![](images/image017.png)
 ## Create a Build Pipeline
-
-> In this step, we will create a Build pipeline to build a docker container image that contains our application and also push it to AWS Elastic Container Repository
+### Import Sample Application code to local Azure DevOps Git repo
+> In this step, we will create a Build pipeline to build a docker container image that contains our application and also push it to AWS Elastic Container Repository. We will import an existing sample .Net Core Application code available in a public Github repository to clone it in Azure DevOps Git repository. Subsequently, we will create a new build pipeline for this application. 
 
 * Navigate to **Repos** page on the left navigation section. The screen should look similar to this below
 ![](images/image009.png)
 * Click on **Import** under **or Import a repository**
-* Select **Requires authorization** checkbox and enter the GitHub URL (https://github.com/awsimaya/ECSFargate.git) and your GitHub credentials. Click **Import**. Now Azure DevOps will clone the project from GitHub into its own git repo
+* Enter the GitHub URL (https://github.com/awsimaya/ECSFargate.git). Click **Import**. 
+* Now Azure DevOps will clone the project from GitHub into its own git repo.
 ![](images/gitimport.png)
+* You can also create a new project and/or repository to start from scratch. To create new project, go to home page in Azure DevOps and select **+ Create Project**. To create new repository in existing project, you can select the **Import repository** from the Repos screen by providing the sample application code's Github repository link. Now Azure DevOps will clone the project from GitHub into its own git repo.
+### Create a new Build pipeline
 * Click **Builds** under **Pipelines**. On this page, click **New Pipeline**
-* Your page should look like the one below
-![](images/image021.jpg) Click **Use the visual designer** link under **Where is your code?** section 
-* In the next step, select the repo you want to connect to and click **Continue**
+* Your page should look like the one below. Click **Use the visual designer** link under **Where is your code?** section 
+![](images/image021.jpg) 
+* In the next step, select the repo you want to connect to.
+* Click **Continue**.
 * On the **Select a template** screen, select **Empty Job** as shown in the screenshot below and click **Apply**
 ![](images/image024.png)
-* Now you should be on the **Tasks** tab inside the Build pipeline. Here, to the right hand side for the drop down **Agent Pool** under **Agent job**, select _Hosted Ubuntu 1604_. Leave other fields to the default values.
-* Add a task by click on the **+** sign next to **Agent job 1** on the left hand side. Type **Command** on the search bar on the right hand side. You should see the **Command Line** task as shown below
-![](images/image029.png). Now click **Add**
-* Once added, name the task **Build Docker Image** and enter the command _docker build -t hellofargate ./HelloFargate_ in the **Script** field as shown below
+* Now you should be on the **Tasks** tab inside the Build pipeline. Here, to the right hand side for the drop down **Agent Pool** under **Agent job**, select _Hosted Ubuntu 1604_. More information on Microsoft-hosted agents in Azure DevOps can be found here (https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=vsts&tabs=yaml). 
+* Leave other fields to their default values.
+* Add a task by click on the **+** sign next to **Agent job 1** on the left hand side. Type **Command** on the search bar on the right hand side. You should see the **Command Line** task as shown below and click **Add**.
+![](images/image029.png)
+* Once added, name the task **Build Docker Image** and enter the command _docker build -t hellofargate ./HelloFargate_ in the **Script** field as shown below. This command will tag the resulting docker image with 'hellofargate' (case sensitive) and provides HelloFargate folder in the repository as the build context (path to the Dockerfile). Syntax of the command is _docker build [OPTIONS] PATH | URL | -_. More details on docker build command can be found here (https://docs.docker.com/engine/reference/commandline/build/).
+
 ![](images/image031.png)
 * Once again click on the + symbol next to  **Agent job 1**. Type _aws_ on the search field which will list all **AWS** tasks. 
 * Select _AWS Elastic Container Registry Push_ task and click **Add**
-* Name the image _Push Image to ECR_. Select the name of the AWS Credentials you setup earlier under **AWS Credentials** drop down. Select _EU (Ireland) [eu-west-1]_ as Region. Select _Image name with optional tag_ for Image identity field. Enter _hellofargate_ for the **Source Image Name** field. Enter _latest_ for **Source Image tag** field. Enter _hellofargaterepo_ for the **Target Repository Name** field. Enter _latest_ for the **Target Repository Tag** field. Now click on **Save pipeline** to save your changes. The screenshot below shows all the settings for easier understanding.
-![](images/image038.png)
+* Name the image _Push Image to ECR_. Select the name of the AWS Credentials you setup earlier under **AWS Credentials** drop down. Select _EU (Ireland) [eu-west-1]_ as Region. Select _Image name with optional tag_ for Image identity field. Enter _hellofargate_ for the **Source Image Name** field. Enter _latest_ for **Source Image tag** field. Enter _hellofargaterepo_ for the **Target Repository Name** field (or if you named your ECR repo differently then use that name). Enter _latest_ for the **Target Repository Tag** field. Now click on **Save pipeline** to save your changes. The screenshot below shows all the settings for easier understanding.
+![](images/push-image-to-ecr-with-create-new-ecr-repo.png)
+
 * You can rename the build pipeline by just clicking on **HelloFargate-CI** at the top and typing a name as shown below
 ![](images/image040.png)
 
 > It might take around 2 minutes or so for the image to be published to the repository. Go ahead and start the next step (_Create ECS Task Definition_) till this gets completed.
 
 * Go to the AWS ECR console and click on **hellofargaterepo** repository and make sure there is a new entry and the **Pushed at** column reflects the latest timestamp
+![](images/ecr-repo-image-push-validate.png)
 
 ## Create ECS Task Definition
 > In this step, we are going to create a _Task Definition_ that will be used to create the container instances in the cluster. A task definition is the core resource within ECS. This is where you define which container images to run, CPU/Memory, ports, commands etc.
@@ -78,17 +97,23 @@
 * Select **Task Definitions** and click on **Create new Task Definition** 
 * On the next screen, select **FARGATE** launch type and click **Next**
 * On the next screen, give the Task Definition a name. In this exercise, I will call it _MyNextTaskDefinition_
+* Leave **Task Role** and **Network Mode** fields to their default values. 
 * Select _0.5 GB_ for Task memory and _0.25 vCPU_ for Task CPU dropdowns respectively
 * Your screen should look similar to the one below
 ![](images/image087.png)
 * Click **Add Container**
 * Name the container as _hellofargatecontainer_
-* Copy and paste the Repository URL from ECR and paste into **Image** textbox. Make sure you add the tag _:latest_ to the end of the string
-* Add _80_ to Port mappings and click **Add**
+* Copy and paste the Repository URL from ECR and paste into **Image** textbox. Make sure you add the tag _:latest_ to the end of the string. Ensure there are no white spaces at the end. 
+* Ignore the **Private repository authentication** and **Memory Limits (MiB)** fields 
+* Add _80_ to Port mappings 
+* Ignore the **Advanced container configuration section**
+* Click on **Add** button on bottom right corner
 * Your screen should look similar to the one below
 ![](images/image085.png)
-* Now click **create**
+* Now click **Create**
 * Your Task definition is created successfully
+* Your screen should look similar to the one below
+![](images/ecs-task-definition-created-success-msg.png)
 
 ## Create ECS Cluster
 > In this section we are going to create a Elastic Container Service cluster. A cluster typically has one or more nodes , which are the workermachines that run your containerized applications and other workloads.
@@ -99,12 +124,13 @@
 * Select **Networking Only** option and click **Next step**
 * Name the cluster as _hellofargatecluster_ 
 * Check the **Create VPC** checkbox 
+* Type a CIDR range to allocate to your VPC and subnet. You may use online tools to validate subnet CIDR allocation (example https://cidr.xyz/ , https://www.site24x7.com/tools/ipv4-subnetcalculator.html)
 * Delete Subnet 2 by clicking the _x_ to the right and leave other values to default
 * Click **Create**
 > This step will take about a minute to complete. In the background, AWS is creating a [CloudFormation](https://aws.amazon.com/cloudformation/) stack with all the input settings.
 
 * ECS cluster is created sucessfully
-> Once complete, make sure you take a note of the VPC name that we just created, since we will use it in the future steps
+> **Important:** Once complete, make sure you take a note of the VPC name that we just created, since we will use it in the future steps
 * Click on **View Cluster** to see the cluster
 
 ## Create a new Service
@@ -118,7 +144,7 @@
 * Click on **Edit** for **Security groups** and ensure the **Inboud rules for security group** has Port 80 selected. Look at the image below for clarity. Click cancel to exit the **Configure security groups** page
 ![](images/securitygroup.png)
 * Select _None_ for Load balancing
-* Under **Service Discovery** uncheck the **Enable service discovery integration** checkbox and click **Next Step**
+* Under **Service Discovery (optional)** section uncheck the **Enable service discovery integration** checkbox as this is not required for this lab and click **Next Step**
 * Leave the **Set Auto Scaling** to _Do not adjust the service's desired count_ as it is
 * Do a quick review of the **Review** screen and click **Create service**
 * The cluster service is now created successfully
@@ -129,6 +155,7 @@
 * Once the value on **Last status** column says **RUNNING** and is green, click on the task name under **Task** column
 * Copy and paste the value of **Public IP** under **Network** on to a new browser tab and press Enter
 * You should see the home page of the your new application running on Amazon ECS Fargate
+![](images/deployed-application-success.png)
 
 ## Create a Release Pipeline
 * Go to **Releases** page on your Azure DevOps project
